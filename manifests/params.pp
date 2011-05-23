@@ -11,10 +11,10 @@
 class mongodb::params {
 	case $operatingsystemrelease {
 		"10.04": {
-			$repository="deb http://downloads.mongodb.org/distros/ubuntu 10.4 10gen"
+			$repository="deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen"
 		}
 		"10.10": {
-			$repository="deb http://downloads.mongodb.org/distros/ubuntu 10.10 10gen"
+			$repository="deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen"
 		}
 	}
 }

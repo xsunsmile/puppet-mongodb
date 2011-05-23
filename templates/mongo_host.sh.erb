@@ -1,0 +1,43 @@
+#!/usr/bin/ruby
+
+require 'rubygems'
+require 'mongo'
+require "socket"
+
+operation = ARGV.shift
+mongo_host = "<%= mongo_host %>"
+hosts_db = "inters_hosts"
+
+conn = Mongo::Connection.new( mongo_host )
+db = conn.db( hosts_db )
+hosts_coll = db.collection("hosts")
+
+case operation
+  when 'put'
+    hostname = ARGV.shift
+    hostname = Socket.gethostname unless hostname
+    hostname_s = hostname.split(/\./).first
+    hostent = Socket.gethostbyname( hostname )
+    hostip = hostent[3].unpack("C4").join('.')
+    host = hosts_coll.find( "name" => hostname_s ).first
+    if host
+      hosts_coll.update({"_id" => host["_id"]}, 
+        {"$set" => {"ip" => hostip } } )
+      hosts_coll.update({"_id" => host["_id"]}, 
+        {"$set" => {"namef" => "#{hostname_s}.#{`hostname -d`.sub(/\n/,'')}" } } )
+    else
+      new_host = { "name" => hostname_s, 
+        "namef" => "#{hostname_s}.#{`hostname -d`.sub(/\n/,'')}", "ip" => hostip }
+      hosts_coll.insert( new_host )
+    end
+  when 'get'
+    get_arg = ARGV.shift
+    case get_arg
+      when 'all'
+        puts hosts_coll.find().collect{ |it| it["name"] }
+      else
+        puts hosts_coll.find().collect do |it|
+          it["name"] if it["name"] != `hostname -s`.sub(/\n/,'')
+        end.compact
+    end
+end
