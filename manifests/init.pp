@@ -14,7 +14,14 @@
 # Sample Usage:
 #  include mongodb
 #
+
+$mongo_host = $mongo_host ?{
+	'' => "127.0.0.1",
+	default => $mongo_host,
+}
+
 class mongodb {
+
 	include mongodb::params
 	include mongodb::ruby
 	
@@ -52,9 +59,14 @@ class mongodb {
 		require => Exec["install-mongodb-manually"],
 	}
 
+	$command_puthost = $hostname_s ?{
+		'' => "mongo_host put",
+		default => "mongo_host put ${hostname_s}",
+	}
+
 	exec { "add_host":
 		path => "/bin:/usr/bin",
-		command => "mongo_host put",
+		command => $command_puthost,
 		require => [ Service['mongodb'], File['/usr/bin/mongo_host'] ],
 	}
 
@@ -82,3 +94,4 @@ class mongodb {
 	}
 
 }
+
