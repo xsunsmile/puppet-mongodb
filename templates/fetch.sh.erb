@@ -1,0 +1,9 @@
+#!/bin/bash
+
+version="<%= mongodb_version %>"
+[ -z "$version" ] && version="1.8.1"
+arch=`arch`
+[ "$arch" == "x86_64" ] && arch="amd64"
+base_url="http://downloads-distro.mongodb.org/repo/ubuntu-upstart/dists/dist/10gen"
+wget ${base_url}/binary-${arch}/mongodb-10gen_${version}_${arch}.deb
+mv mongodb-10gen_${version}_${arch}.deb mongodb.deb

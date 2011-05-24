@@ -14,8 +14,7 @@
 # Sample Usage:
 #  include mongodb
 #
-
-$mongo_host = $mongo_host ?{
+$mongo_host = $user_mongo_host ?{
 	'' => "127.0.0.1",
 	default => $mongo_host,
 }
@@ -43,20 +42,53 @@ class mongodb {
 	# 	require => Exec["10gen-apt-repo"],
 	# }
 
-	file { "/tmp/mongodb-10gen_1.8.1_amd64.deb":
-		source => "puppet:///modules/mongodb/mongodb-10gen_1.8.1_amd64.deb",
+	file { "/tmp/mongodb":
+		ensure => directory,
+		owner => root,
+		group => root,
+		mode => 0755,
+	}
+
+	file { "/tmp/mongodb/fetch.sh":
+		ensure => present,
+		owner => root,
+		group => root,
+		content => template("mongodb/fetch.sh.erb"),
+		mode => 0755,
+		require => File['/tmp/mongodb'],
+	}
+
+	exec { "fetch-deb":
+		cwd => "/tmp/mongodb",
+		path => "/tmp/mongodb",
+		command => "fetch.sh",
+		require => File['/tmp/mongodb/fetch.sh'],
+	}
+
+	file { "/tmp/mongodb/mongodb.deb":
+		ensure => present,
+		owner => root,
+		group => root,
+		require => Exec['fetch-deb'],
 	}
 
 	exec { "install-mongodb-manually":
-		command => "sudo dpkg -i /tmp/mongodb-10gen_1.8.1_amd64.deb",
+		command => "sudo dpkg -i /tmp/mongodb/mongodb.deb",
 		unless => "dpkg -s mongodb 2>/dev/null",
-		require => File["/tmp/mongodb-10gen_1.8.1_amd64.deb"],
+		require => File["/tmp/mongodb/mongodb.deb"],
 	}
 	
 	service { "mongodb":
 		enable => true,
 		ensure => running,
 		require => Exec["install-mongodb-manually"],
+	}
+
+	file { '/usr/bin/mongo_get':
+		mode => "755",
+		owner => root,
+		group => root,
+		content => template("mongodb/mongo_get.sh.erb"),
 	}
 
 	$command_puthost = $hostname_s ?{
@@ -75,7 +107,6 @@ class mongodb {
 			content => template("mongodb/mongodb.conf.erb"),
 			mode => "0644",
 			notify => Service["mongodb"],
-			require => Package["mongodb-10gen"],
 		}
 	}
 
@@ -89,7 +120,7 @@ class mongodb {
 	define mongofile_get {
 		exec { "mongofile_get_${name}":
 			command => "mongo_get ${MONGO_HOST} ${name} && echo ''",
-			require => Service["mongodb"],
+			require => [ File['/usr/bin/mongo_get'], Service["mongodb"] ],
 		}
 	}
 
