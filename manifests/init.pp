@@ -61,8 +61,8 @@ class mongodb {
 	}
 
 	exec { "fetch-deb":
-		cwd => "/tmp/mongodb:/usr/bin:/usr/local/bin",
-		path => "/tmp/mongodb",
+		cwd => "/tmp/mongodb",
+		path => "/tmp/mongodb:/usr/bin:/usr/local/bin",
 		command => "fetch.sh",
 		require => File['/tmp/mongodb/fetch.sh'],
 	}
