@@ -1,10 +1,11 @@
 # Class: mongodb
 #
-# This class installs MongoDB (stable)
+# This class installs MongoDB (under dev)
 #
 # Notes:
 #  This class is Ubuntu specific.
 #  By Sean Porter, Gastown Labs Inc.
+#  modified by Hao SUN, NII
 #
 # Actions:
 #  - Install MongoDB using a 10gen Ubuntu repository
@@ -13,6 +14,15 @@
 #
 # Sample Usage:
 #  include mongodb
+#
+# in your site.pp
+# $extlookup_datadir = "/etc/puppet/manifests/extdata"
+# $extlookup_precedence = ["%{fqdn}", "domain_%{domain}", "common"]
+#
+# in your /etc/puppet/manifests/extdata/common.csv:
+# mongodb_version,1.8.1
+# mongodb_repo,deb http://...
+# mongodb_host,192.168.x.x
 #
 
 class mongodb {
