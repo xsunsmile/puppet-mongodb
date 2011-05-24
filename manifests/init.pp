@@ -14,17 +14,15 @@
 # Sample Usage:
 #  include mongodb
 #
-$mongo_host = $user_mongo_host ?{
-	'' => "127.0.0.1",
-	default => $mongo_host,
-}
 
 class mongodb {
 
 	include mongodb::params
 	include mongodb::ruby
 	
-	$mongodb_version = $mongodb::params::mongodb_version
+	$mongodb_version = extlookup('mongodb_version')
+	$mongodb_repository = extlookup('mongodb_repo')
+	$mongodb_host = extlookup('mongodb_host')
 
 	package { "python-software-properties":
 		ensure => installed,

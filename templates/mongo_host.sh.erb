@@ -5,7 +5,7 @@ require 'mongo'
 require "socket"
 
 operation = ARGV.shift
-mongo_host = "<%= mongo_host %>"
+mongo_host = "<%= mongodb_host %>"
 hosts_db = "inters_hosts"
 
 conn = Mongo::Connection.new( mongo_host )
