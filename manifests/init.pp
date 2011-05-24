@@ -27,7 +27,6 @@
 
 class mongodb {
 
-	include mongodb::params
 	include mongodb::ruby
 	
 	$mongodb_version = extlookup('mongodb_version')
