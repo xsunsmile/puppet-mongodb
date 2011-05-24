@@ -26,12 +26,12 @@
 #
 
 class mongodb {
-
-	include mongodb::ruby
 	
 	$mongodb_version = extlookup('mongodb_version')
 	$mongodb_repository = extlookup('mongodb_repo')
 	$mongodb_host = extlookup('mongodb_host')
+
+	include mongodb::ruby
 
 	package { "python-software-properties":
 		ensure => installed,
