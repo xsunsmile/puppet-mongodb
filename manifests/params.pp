@@ -9,6 +9,7 @@
 #  include mongodb::params
 #
 class mongodb::params {
+	$mongodb_version = ""
 	case $operatingsystemrelease {
 		"10.04": {
 			$repository="deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen"

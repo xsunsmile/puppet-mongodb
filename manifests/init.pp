@@ -24,6 +24,8 @@ class mongodb {
 	include mongodb::params
 	include mongodb::ruby
 	
+	$mongodb_version = $mongodb::params::mongodb_version
+
 	package { "python-software-properties":
 		ensure => installed,
 	}
@@ -59,7 +61,7 @@ class mongodb {
 	}
 
 	exec { "fetch-deb":
-		cwd => "/tmp/mongodb",
+		cwd => "/tmp/mongodb:/usr/bin:/usr/local/bin",
 		path => "/tmp/mongodb",
 		command => "fetch.sh",
 		require => File['/tmp/mongodb/fetch.sh'],
