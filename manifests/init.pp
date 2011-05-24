@@ -37,20 +37,11 @@ class mongodb {
 	package { "python-software-properties":
 		ensure => installed,
 	}
-	
-	# exec { "10gen-apt-repo":
-	# 	path => "/bin:/usr/bin",
-	# 	command => "add-apt-repository '${mongodb::params::repository}'",
-	# 	unless => "cat /etc/apt/sources.list | grep 10gen",
-	# 	require => Package["python-software-properties"],
-	# }
-	# 
-	# exec { "10gen-apt-key":
-	# 	path => "/bin:/usr/bin",
-	# 	command => "apt-key adv --keyserver keyserver.ubuntu.com --recv 7F0CEB10",
-	# 	unless => "apt-key list | grep 10gen",
-	# 	require => Exec["10gen-apt-repo"],
-	# }
+
+	line { 'mongodb_host':
+		file => "/etc/hosts",
+    line => "${mongodb_host}	mongodb-master	mongodb_host",
+	}
 
 	file { "/tmp/mongodb":
 		ensure => directory,
