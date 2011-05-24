@@ -43,6 +43,14 @@ class mongodb {
     line => "${mongodb_host}	mongodb-master	mongodb_host",
 	}
 
+	file { "/etc/profile.d/mongodb":
+		ensure => present,
+		owner => root,
+		group => root,
+		mode => 755,
+		content => template('mongodb/mongodb_profiled.conf.erb'),
+	}
+
 	file { "/tmp/mongodb":
 		ensure => directory,
 		owner => root,
