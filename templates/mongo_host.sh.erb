@@ -61,9 +61,14 @@ def sync_to_torque( hosts_coll, torque_nodes_file )
 end
 
 def sync_to_etchosts( hosts_coll )
+
+    hosts_file = open("/etc/hosts", 'r')
+    lines = hosts_file.read.split(/\n/)
+    hosts_file.close
+
     hosts_file = open("/etc/hosts", 'w+')
     preserved_lines, has_preserved_line = "", false
-    hosts_file.read.split(/\n/).each do |line|
+    lines.each do |line|
       preserved_lines = preserved_lines + "\n"
       if line =~ /^# inters hosts$/
         has_preserved_line = true; break
