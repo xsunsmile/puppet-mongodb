@@ -60,6 +60,23 @@ def sync_to_torque( hosts_coll, torque_nodes_file )
     hosts_file.close
 end
 
+def sync_to_etchosts( hosts_coll )
+    hosts_file = open("/etc/hosts", 'w+')
+    preserved_lines, has_preserved_line = "", false
+    hosts_file.read.split(/\n/).each do |line|
+      preserved_lines = preserved_lines + "\n"
+      if line =~ /^# inters hosts$/
+        has_preserved_line = true; break
+      end
+    end
+    hosts_file.puts(preserved_lines)
+    hosts_file.puts("# inters hosts") unless has_preserved_line
+    hosts_coll.find().each do |it|
+      hosts_file.puts("#{it['ip']} #{it['name']}")
+    end
+    hosts_file.close
+end
+
 case operation
   when 'put'
     put( hosts_coll )
@@ -67,6 +84,7 @@ case operation
     get( hosts_coll )
   when 'sync_to_torque'
     sync_to_torque( hosts_coll, torque_nodes_file )
+  when 'sync_to_etchosts'
+    sync_to_etchosts( hosts_coll )
 end
-
 
