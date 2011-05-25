@@ -2,10 +2,13 @@
 
 require 'rubygems'
 require 'mongo'
-require "socket"
+require 'socket'
+require 'facter'
 
 operation = ARGV.shift
 mongo_host = "<%= mongodb_host %>"
+torque_spool_dir = "<%= scope.function_extlookup(['torque_spool_dir']) %>" || "/var/spool/torque"
+torque_nodes_file = torque_spool_dir + "/server_priv/nodes"
 hosts_db = "inters_hosts"
 
 conn = Mongo::Connection.new( mongo_host )
@@ -14,6 +17,14 @@ hosts_coll = db.collection("hosts")
 
 case operation
   when 'put'
+		put( hosts_coll )
+  when 'get'
+		get( hosts_coll )
+  when 'sync_to_torque'
+		sync_to_torque( hosts_coll, torque_nodes_file )
+end
+
+def put( hosts_coll )
     hostname = ARGV.shift
     hostname = Socket.gethostname unless hostname
     hostname_s = hostname.split(/\./).first
@@ -21,23 +32,38 @@ case operation
     hostip = hostent[3].unpack("C4").join('.')
     host = hosts_coll.find( "name" => hostname_s ).first
     if host
-      hosts_coll.update({"_id" => host["_id"]}, 
-        {"$set" => {"ip" => hostip } } )
-      hosts_coll.update({"_id" => host["_id"]}, 
+      hosts_coll.update({"_id" => host["_id"]},
         {"$set" => {"namef" => "#{hostname_s}.#{`hostname -d`.sub(/\n/,'')}" } } )
+      hosts_coll.update({"_id" => host["_id"]},
+        {"$set" => {"ip" => hostip } } )
+      hosts_coll.update({"_id" => host["_id"]},
+        {"$set" => {"np" => Facter.value(:processorcount) } } )
     else
-      new_host = { "name" => hostname_s, 
-        "namef" => "#{hostname_s}.#{`hostname -d`.sub(/\n/,'')}", "ip" => hostip }
+      new_host = { "name" => hostname_s,
+        "namef" => "#{hostname_s}.#{`hostname -d`.sub(/\n/,'')}",
+        "ip" => hostip, "np" => Facter.value(:processorcount) }
       hosts_coll.insert( new_host )
     end
-  when 'get'
-    get_arg = ARGV.shift
+end
+
+def get( hosts_coll )
+    get_arg, result = ARGV.shift, ''
     case get_arg
       when 'all'
-        puts hosts_coll.find().collect{ |it| it["name"] }
+        result = hosts_coll.find().collect{ |it| it["name"] }
       else
-        puts hosts_coll.find().collect do |it|
+        result = hosts_coll.find().collect do |it|
           it["name"] if it["name"] != `hostname -s`.sub(/\n/,'')
         end.compact
     end
+		puts result
 end
+
+def sync_to_torque( hosts_coll, torque_nodes_file )
+		hosts_file = open(torque_nodes_file, 'w+')
+    hosts_coll.find().each do |it|
+			hosts_file.puts("#{it['name']}  np=#{it['np']}")
+		end
+		hosts_file.close
+end
+
