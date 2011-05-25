@@ -23,7 +23,7 @@ def put( hosts_coll )
     hostent = Socket.gethostbyname( hostname )
     hostip = hostent[3].unpack("C4").join('.')
     host = hosts_coll.find( "name" => hostname_s ).first
-		np = Facter.value(:processorcount) || `cat /proc/cpuinfo | grep -c processor`
+    np = Facter.value(:processorcount) || `cat /proc/cpuinfo | grep -c processor`.sub(/\n/,'')
     if host
       hosts_coll.update({"_id" => host["_id"]},
         {"$set" => {"namef" => "#{hostname_s}.#{`hostname -d`.sub(/\n/,'')}" } } )
