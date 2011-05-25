@@ -72,6 +72,7 @@ class mongodb {
 		path => "/tmp/mongodb:/usr/bin:/usr/local/bin:/bin",
 		command => "fetch.sh",
 		require => File['/tmp/mongodb/fetch.sh'],
+		unless => 'ls /tmp/mongodb/mongodb.deb',
 	}
 
 	file { "/tmp/mongodb/mongodb.deb":
