@@ -33,13 +33,14 @@ class mongodb {
 
 	include mongodb::ruby
 
-	package { "python-software-properties":
-		ensure => installed,
+	line { 'mongodb_host_pub':
+		file => "/etc/hosts",
+		line => "${mongodb_host}	mongodb-master-pub	mongodb_host",
 	}
 
-	line { 'mongodb_host':
+	line { 'mongodb_host_pri':
 		file => "/etc/hosts",
-    line => "${mongodb_host}	mongodb-master	mongodb_host",
+		line => "${ipaddress}	mongodb-master-pri	mongodb_host_pri",
 	}
 
 	file { "/etc/profile.d/mongodb":
