@@ -69,7 +69,7 @@ def sync_to_etchosts( hosts_coll )
     hosts_file = open("/etc/hosts", 'w+')
     preserved_lines, has_preserved_line = "", false
     lines.each do |line|
-      preserved_lines = preserved_lines + "\n"
+      preserved_lines += line + "\n"
       if line =~ /^# inters hosts$/
         has_preserved_line = true; break
       end
