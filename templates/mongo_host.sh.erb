@@ -7,22 +7,14 @@ require 'facter'
 
 operation = ARGV.shift
 mongo_host = "<%= mongodb_host %>"
-torque_spool_dir = "<%= scope.function_extlookup(['torque_spool_dir']) %>" || "/var/spool/torque"
+torque_spool_dir = "<%= scope.function_extlookup(['torque_spool_dir']) %>"
+torque_spool_dir = "/var/spool/torque" unless torque_spool_dir.size > 0
 torque_nodes_file = torque_spool_dir + "/server_priv/nodes"
 hosts_db = "inters_hosts"
 
 conn = Mongo::Connection.new( mongo_host )
 db = conn.db( hosts_db )
 hosts_coll = db.collection("hosts")
-
-case operation
-  when 'put'
-		put( hosts_coll )
-  when 'get'
-		get( hosts_coll )
-  when 'sync_to_torque'
-		sync_to_torque( hosts_coll, torque_nodes_file )
-end
 
 def put( hosts_coll )
     hostname = ARGV.shift
@@ -56,14 +48,24 @@ def get( hosts_coll )
           it["name"] if it["name"] != `hostname -s`.sub(/\n/,'')
         end.compact
     end
-		puts result
+    puts result
 end
 
 def sync_to_torque( hosts_coll, torque_nodes_file )
-		hosts_file = open(torque_nodes_file, 'w+')
+    hosts_file = open(torque_nodes_file, 'w+')
     hosts_coll.find().each do |it|
-			hosts_file.puts("#{it['name']}  np=#{it['np']}")
-		end
-		hosts_file.close
+      hosts_file.puts("#{it['name']}  np=#{it['np']}")
+    end
+    hosts_file.close
 end
+
+case operation
+  when 'put'
+    put( hosts_coll )
+  when 'get'
+    get( hosts_coll )
+  when 'sync_to_torque'
+    sync_to_torque( hosts_coll, torque_nodes_file )
+end
+
 
