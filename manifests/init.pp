@@ -33,16 +33,6 @@ class mongodb {
 
 	include mongodb::ruby
 
-	line { 'mongodb_host_pub':
-		file => "/etc/hosts",
-		line => "${mongodb_host}	mongodb-master	mongodb_host",
-	}
-
-	line { 'mongodb_host_pri':
-		file => "/etc/hosts",
-		line => "${ipaddress}	mongodb-master-pri	mongodb_host_pri",
-	}
-
 	file { "/etc/profile.d/mongodb":
 		ensure => present,
 		owner => root,
@@ -94,50 +84,11 @@ class mongodb {
 		require => Exec["install-mongodb-manually"],
 	}
 
-	file { '/usr/bin/mongo_get':
-		mode => "755",
-		owner => root,
-		group => root,
-		content => template("mongodb/mongo_get.sh.erb"),
-	}
-
-	$command_puthost = $hostname_s ?{
-		'' => "mongo_host put",
-		default => "mongo_host put ${hostname_s}",
-	}
-
-	exec { "add_host":
-		path => "/bin:/usr/bin",
-		command => $command_puthost,
-		require => [ Service['mongodb'], File['/usr/bin/mongo_host'] ],
-	}
-
 	define replica_set {
 		file { "/etc/init/mongodb.conf":
 			content => template("mongodb/mongodb.conf.erb"),
 			mode => "0644",
 			notify => Service["mongodb"],
-		}
-	}
-
-	define mongofile_put {
-		exec { "mongofile_put_${name}":
-			command => "mongofiles -r --host mongodb_host put ${name}",
-			require => [
-				Service["mongodb"],
-				Line['mongodb_host_pub'] 
-			],
-		}
-	}
-
-	define mongofile_get {
-		exec { "mongofile_get_${name}":
-			command => "mongo_get mongodb_host ${name} && echo ''",
-			require => [
-				File['/usr/bin/mongo_get'],
-				Service["mongodb"],
-				Line['mongodb_host_pub']
-			],
 		}
 	}
 
