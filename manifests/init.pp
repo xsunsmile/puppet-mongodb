@@ -78,10 +78,17 @@ class mongodb {
 		require => File["/tmp/mongodb/mongodb.deb"],
 	}
 	
+	replace { "unbind-127.0.0.1":
+		file => "/etc/mongodb.conf",
+		pattern => "^\s*bind_ip.*$",
+		replacement => "# bind_ip = 127.0.0.1",
+		require => Exec['install-mongodb-manually'],
+	}
+
 	service { "mongodb":
 		enable => true,
 		ensure => running,
-		require => Exec["install-mongodb-manually"],
+		require => Replace['unbind-127.0.0.1'],
 	}
 
 	define replica_set {
