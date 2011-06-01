@@ -74,7 +74,7 @@ class mongodb {
 
 	exec { "install-mongodb-manually":
 		command => "sudo dpkg -i /tmp/mongodb/mongodb.deb",
-		unless => "dpkg -s mongodb 2>/dev/null",
+		unless => "dpkg -s mongodb-10gen | grep ^Status | grep ok",
 		require => File["/tmp/mongodb/mongodb.deb"],
 	}
 	
