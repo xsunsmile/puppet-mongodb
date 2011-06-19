@@ -1,14 +1,14 @@
 #!/bin/bash
 
-version="<%= mongodb_version %>"
 arch=`arch`
 [ "$arch" = "x86_64" ] && arch="amd64"
 [ "$arch" = "i686" ] && arch="i386"
+package="mongodb-10gen_${version}_${arch}.deb"
 base_url="http://downloads-distro.mongodb.org/repo/ubuntu-upstart/dists/dist/10gen/binary-${arch}"
 if [ -z "$version" ]; then
-	curl -s $base_url/ -o /tmp/mongodb_html
-	version=$(grep -o 'mongodb-10gen_.*deb"' /tmp/mongodb_html | awk -F\" '{print $1}')
+curl -s $base_url/ -o /tmp/mongodb_html
+	package=$(grep -o 'mongodb-10gen_.*deb"' /tmp/mongodb_html | awk -F\" '{print $1}')
 fi
-wget ${base_url}/mongodb-10gen_${version}_${arch}.deb
-mv mongodb-10gen_${version}_${arch}.deb mongodb.deb
+wget ${base_url}/$package
+mv $package mongodb.deb
 
